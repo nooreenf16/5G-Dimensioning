@@ -1,8 +1,0 @@
-﻿Test Case,Numerology,Bandwidth MHz,Modulation (QAM),RLC Mode,Number of cells,Number of UEs,DL (Mbps),UL (Mbps),CU cores,CU Overhead cores,DU cores,DU Overhead Cores,CU CPU Util %,DU CPU Util %,DU Overhead Cores Util %,TDD config,testCase
-1,1,100,256,UM,1,1,1400,74,6,,5,,289.4,122.4,,DDDSU,testbed
-2,0,20,64,UM,1,1,235,56,1,,2,,40,21,,DDDSU,simulation
-3,0,20,64,UM,1,8,236,55,1,,2,,44,21,,DDDSU,simulation
-4,1,100,256,UM,6,8,6539,574,6,2,7,4,319,414,117,DDDSU,simulation
-5,1,100,256,UM,6,20,6540,533,5,2,8,4,338,455,158,DDDSU,simulation
-6,3,100,256,UM,6,8,6429,574,6,2,10,4,322,548,251,DDDSU,simulation
-7,3,100,256,UM,6,20,6728,614,6,2,11,4,356,625,328,DDDSU,simulation
