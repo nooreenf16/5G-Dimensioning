@@ -1,0 +1,6 @@
+[console_scripts]
+initialize_mpa_sim_db = mpa_sim.scripts.initialize_db:main
+
+[paste.app_factory]
+main = mpa_sim:main
+
