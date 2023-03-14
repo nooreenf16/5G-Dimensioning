@@ -10,27 +10,16 @@ class Hurestic_Dimensioning:
 
     """
 
-    def __init__(self,path_to_csv,p2,p3,a,b,cell_load,w_x_thr,zeta,radius) -> None:
+    def __init__(self,path_to_csv,simulation_parameters,radius) -> None:
         """
         Args:
             path_to_csv (str): Path to the csv file
-            p2 (int):          probability of active devices(rrc_inactive)
-            p3 (int):          probability of active devices(rrc_connected)
-            a (int):           Lower range of samples
-            b (int):           Upper range of samples
-            cell_load (int):   Cell Load
-            w_x_thr (int):     threshold number of devices per gNB
-            zeta (int):        MNO’s requirements. 
+            simulation_parameters : dict
+            A dict containing all simulation parameters necessary.
             radius (int):      Radius of the deployment area
         """
         self.path_to_csv = path_to_csv
-        self.p2 = p2
-        self.p3 = p3
-        self.a = a
-        self.b = b
-        self.cell_load = cell_load
-        self.w_x_thr = w_x_thr
-        self.zeta = zeta
+        self.simulation_parameters = simulation_parameters
         self.radius = radius
         self.transit_df = pd.DataFrame({"mu":[0,1,2],
                            "delta_f":[15,30,60],
@@ -108,10 +97,10 @@ class Hurestic_Dimensioning:
 
         # Rmax (if you don't know what is it, don't change). Value depends on the type of coding from 3GPP 38.212 and 3GPP 38.214 
         # (For LDPC code maximum number is 948/1024 = 0.92578125)
-        R_max = 948/1024
+        R_max = self.simulation_parameters["Rmax"]
 
         # Scaling Factor 
-        f = 1
+        f = self.simulation_parameters["Scaling_factor"]
 
         # Tμs(j) = (10^-3)/(14*2^μ) – average OFDM symbol duration in a subframe for μ(i) value for normal cyclic prefix
         t_s_mu = 10**-3/(14* (2**mu))
@@ -303,12 +292,12 @@ class Hurestic_Dimensioning:
         fitered_data = self.network_acquisition(m_data, self.a, self.b)
 
         results = []
-        W_x_thr = self.w_x_thr
+        W_x_thr = self.simulation_parameters["W_x_thr"]
 
-        zeta = self.zeta
+        zeta = self.simulation_parameters["zeta"]
 
-        p2 = self.p2
-        p3 = self.p3
+        p2 = self.simulation_parameters["p2"]
+        p3 = self.simulation_parameters["p3"]
 
         s = 3
         β = 0
@@ -374,7 +363,7 @@ class Hurestic_Dimensioning:
         Agm =  math.pi*self.radius**2
 
         m_list = top_3_mnc
-        δcov = self.cell_load
+        δcov = self.simulation_parameters['cell_load']
         phim = phi_m
 
         output = self.NetDimensioning(Agm, m_list,δcov,phim,top_3_mnc_samples,m_data)
