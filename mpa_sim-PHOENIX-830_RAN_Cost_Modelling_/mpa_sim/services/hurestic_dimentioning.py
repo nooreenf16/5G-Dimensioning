@@ -1,5 +1,6 @@
 import pandas as pd
 import math
+from sklearn.cluster import KMeans
 # import scipy  
 # import seaborn as sns;sns.set(style="white")
 
@@ -282,14 +283,14 @@ class Hurestic_Dimensioning:
 
             Returns:
                 Zcov             : The cell range R(in km).
-                Zcap             : The minimun number of radio sites Z
-                Ptx              : Transmit power level Ptx
+                Zcap             : The minimun number of radio sites Z.
+                Ptx              : Transmit power level Ptx.
 
         """
 
         mu_ls = [0,1,2]
 
-        fitered_data = self.network_acquisition(m_data, self.a, self.b)
+        fitered_data = self.network_acquisition(m_data, self.simulation_parameters['a'], self.simulation_parameters['b'])
 
         results = []
         W_x_thr = self.simulation_parameters["W_x_thr"]
@@ -305,7 +306,7 @@ class Hurestic_Dimensioning:
             Wthr_x = self.capacity_model( W_x_thr, zeta, mu, p2, p3)
             β += Wthr_x
         β = β*s
-        R_x_cov = [0] * 20
+        R_x_cov = [0] * 1000
         
         for m_idx in m_list:
             for x_idx in [1,2,3]:
@@ -339,8 +340,36 @@ class Hurestic_Dimensioning:
     def calculate_results(self):
 
 
-        col_names = ["Radio", "MCC", "MNC", "LAC", "CID", "Unit", "long", "lat", "radius", "samples", "changeble", "created", "updated", "Average_Signals"]
-        df = pd.read_csv(self.path_to_csv, names = col_names)
+        # col_names = ["Radio", "MCC", "MNC", "LAC", "CID", "Unit", "long", "lat", "radius", "samples", "changeble", "created", "updated", "Average_Signals"]
+        # df = pd.read_csv(self.path_to_csv, names = col_names)
+        df_final = pd.read_csv(self.path_to_csv)
+        df_1 = df_final[['range', 'samples']]
+        k = 4
+
+        # Fit the K-means clustering model
+        kmeans = KMeans(n_clusters=k, random_state=0).fit(df_1)
+
+        # Add the cluster labels to the original DataFrame
+        df_final['cluster'] = kmeans.labels_
+
+        # Create separate DataFrames for each cluster
+        clustered_dfs = []
+        for cluster_id in range(k):
+            cluster_df = df_final[df_final['cluster'] == cluster_id].drop('cluster', axis=1)
+            clustered_dfs.append(cluster_df)
+
+
+        def predict_cluster(range_value, sample_value, kmeans_model):
+            data_point = [[range_value, sample_value]]
+            cluster_label = kmeans_model.predict(data_point)
+            return cluster_label[0]
+
+        # Assuming you have already trained the K-means model as 'kmeans' in the previous step
+        approx_sample_size = (self.simulation_parameters['a'] + self.simulation_parameters['b']) / 2
+        predicted_cluster = predict_cluster(self.simulation_parameters['approx_range_of_cell'], approx_sample_size, kmeans)
+
+        df = clustered_dfs[predicted_cluster]
+        print(predicted_cluster)
 
         result = df.groupby(['MNC'])['samples'].sum()
         result.sort_values(ascending=False,inplace=True)
